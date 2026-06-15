@@ -6,10 +6,9 @@
 
 ## 功能特性
 
-- 支持模型: 🎤 mimo-v2.5-tts · 🎨 mimo-v2.5-tts-voicedesign · 🔊 mimo-v2.5-tts-voiceclone · 📦 mimo-v2-tts
+- 支持模型: 🎤 mimo-v2.5-tts · 🎨 mimo-v2.5-tts-voicedesign · 🔊 mimo-v2.5-tts-voiceclone
+- 支持 API 端点切换（小米 MiMo / TokenPlan）
 - 支持 legado 阅读 App 一键导入
-- 语音风格控制（开心、悲伤、东北话、粤语、唱歌等）
-- 情感控制、角色扮演
 - 在线试听
 
 ## 模型版本
@@ -19,7 +18,13 @@
 | **V2.5 内置音色（推荐）** | `mimo-v2.5-tts` | 内置8种音色，快速上手 |
 | **V2.5 VoiceDesign** | `mimo-v2.5-tts-voicedesign` | 文本描述定制音色 |
 | **V2.5 VoiceClone** | `mimo-v2.5-tts-voiceclone` | 上传音频复刻任意音色 |
-| **V2**  | `mimo-v2-tts` | 旧版模型，兼容使用 |
+
+## API 端点
+
+| 端点 | 地址 | 说明 |
+|------|------|------|
+| **小米 MiMo** | `https://api.xiaomimimo.com/v1` | 官方 API |
+| **TokenPlan** | `https://token-plan-cn.xiaomimimo.com/v1` | TokenPlan 服务 |
 
 ## V2.5 三种模式说明
 
@@ -54,37 +59,6 @@
 | `Chloe` | Chloe-英文女声 | 英文女声 |
 | `Milo` | Milo-英文男声 | 英文男声 |
 | `Dean` | Dean-英文男声 | 英文男声 |
-
-### V2 音色（兼容）
-
-| 音色 ID | 名称 |
-|---------|------|
-| `mimo_default` | MiMo-默认 |
-| `default_zh` | MiMo-中文女声 |
-| `default_en` | MiMo-英文女声 |
-
-## 风格示例
-
-### 基础风格 
-
-```
-<style>开心</style>明天就是周五了，真开心！
-<style>悲伤</style>呜呜，我的快递又丢了...
-<style>生气</style>你怎么又迟到了！
-<style>东北话</style>哎呀妈呀，这天儿也忒冷了吧！
-<style>粤语</style>呢个真係好正啊！
-<style>唱歌</style>原谅我这一生不羁放纵爱自由
-<style>悄悄话</style>我跟你说个秘密...
-```
- 
-
-###  角色扮演
-
-```
-<style>孙悟空</style>俺老孙来也！
-<style>林黛玉</style>黛玉在此，见笑了。
-<style>钢铁侠</style>I am Iron Man.
-```
 
 ## 快速部署
 
@@ -156,11 +130,12 @@ pm2 start python --name "mitts" -- main.py
 
 | 参数 | 必填 | 说明 |
 |------|------|------|
-| `api_key` | 是 | 小米 API Key |
+| `api_key` | 是 | API Key |
 | `text` | 是 | 要合成的文本 |
-| `model` | 否 | 模型版本，默认 `v2.5`（可选 `v2.5`、`v2.5_design`、`v2.5_clone`、`v2`） |
-| `voice` | 否 | 音色（v2.5/v2）或音色描述（VoiceDesign） |
+| `model` | 否 | 模型版本，默认 `v2.5`（可选 `v2.5`、`v2.5_design`、`v2.5_clone`） |
+| `voice` | 否 | 音色（v2.5）或音色描述（VoiceDesign） |
 | `audio` | 否 | 音频样本 base64（VoiceClone 模式） |
+| `endpoint` | 否 | API 端点，默认 `xiaomimimo`（可选 `xiaomimimo`、`tokenplan`） |
 
 ## License
 
