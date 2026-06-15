@@ -39,6 +39,18 @@ TTS_MODELS = {
     "v2": "mimo-v2-tts",
 }
 
+# API 端点配置
+API_ENDPOINTS = {
+    "xiaomimimo": {
+        "name": "小米 MiMo",
+        "base_url": "https://api.xiaomimimo.com/v1",
+    },
+    "tokenplan": {
+        "name": "TokenPlan",
+        "base_url": "https://token-plan-cn.xiaomimimo.com/v1",
+    },
+}
+
 
 @app.get("/favicon.ico")
 async def favicon():
@@ -67,20 +79,26 @@ async def tts_forwarder(request: Request):
         voice = body.get("voice", "冰糖")
         model = body.get("model", "v2.5")
         audio_b64 = body.get("audio", "")
+        endpoint = body.get("endpoint", "xiaomimimo")
     else:
         api_key = request.query_params.get("api_key", "")
         text = request.query_params.get("text", "")
         voice = request.query_params.get("voice", "冰糖")
         model = request.query_params.get("model", "v2.5")
         audio_b64 = request.query_params.get("audio", "")
+        endpoint = request.query_params.get("endpoint", "xiaomimimo")
         text = urllib.parse.unquote(urllib.parse.unquote(text))
         audio_b64 = urllib.parse.unquote(urllib.parse.unquote(audio_b64))
 
     # 获取实际模型名称
     model_name = TTS_MODELS.get(model, TTS_MODELS["v2.5"])
 
+    # 获取 API 端点
+    api_config = API_ENDPOINTS.get(endpoint, API_ENDPOINTS["xiaomimimo"])
+    base_url = api_config["base_url"]
+
     try:
-        client = OpenAI(api_key=api_key, base_url="https://api.xiaomimimo.com/v1")
+        client = OpenAI(api_key=api_key, base_url=base_url)
         
         # 根据不同模型构建请求
         if model == "v2.5_clone" and audio_b64:
@@ -138,18 +156,21 @@ async def tts_forwarder(request: Request):
 
 
 @app.get("/api/legado-import")
-async def legado_import(request: Request, voice: str = "冰糖", model: str = "v2.5"):
+async def legado_import(request: Request, voice: str = "冰糖", model: str = "v2.5", endpoint: str = "xiaomimimo"):
     api_key = request.query_params.get("api_key", "")
     base_url = str(request.base_url).replace("http://", "https://").rstrip("/")
     v_name = VOICES.get(voice, f"音色({voice})")
     safe_api_key = urllib.parse.quote(api_key)
 
-    tts_url = f"{base_url}/tts?api_key={safe_api_key}&voice={voice}&model={model}&volume=100&pitch=0&personality=undefined&rate={{{{(speakSpeed - 10) * 2}}}}&text={{{{java.encodeURI(speakText)}}}}"
+    # 获取 API 端点名称
+    api_name = API_ENDPOINTS.get(endpoint, API_ENDPOINTS["xiaomimimo"])["name"]
+
+    tts_url = f"{base_url}/tts?api_key={safe_api_key}&voice={voice}&model={model}&endpoint={endpoint}&volume=100&pitch=0&personality=undefined&rate={{{{(speakSpeed - 10) * 2}}}}&text={{{{java.encodeURI(speakText)}}}}"
 
     return JSONResponse(
         content=[
             {
-                "name": f"小米 - {v_name}",
+                "name": f"{api_name} - {v_name}",
                 "url": tts_url,
                 "contentType": "audio/mpeg",
                 "id": int(time.time() * 1000),

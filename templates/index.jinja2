@@ -471,6 +471,11 @@
     <div class="header">
         <h1>🎤 小米 TTS</h1>
         <div class="api-group">
+            <span class="api-label">API 端点</span>
+            <select id="api_endpoint" style="width: 160px;">
+                <option value="xiaomimimo">小米 MiMo</option>
+                <option value="tokenplan">TokenPlan</option>
+            </select>
             <span class="api-label">API Key</span>
             <input type="password" id="api_key" placeholder="sk-...">
         </div>
@@ -552,7 +557,7 @@
                 <div class="section-title">导入阅读 App</div>
                 <div class="import-notice">
                     <span class="notice-icon">⚠️</span>
-                    <span class="notice-text">使用前请先在顶部填写 <b>小米 API Key</b></span>
+                    <span class="notice-text">使用前请先在顶部填写 <b>API Key</b>，并选择对应的 <b>API 端点</b></span>
                     <a href="https://platform.xiaomimimo.com/" target="_blank" class="notice-link">申请地址</a>
                     <span class="notice-text">，输入后可使用本软件全部功能</span>
                 </div>
@@ -709,6 +714,7 @@
 
         window.onload = function() {
             document.getElementById('api_key').value = localStorage.getItem('api_key') || '';
+            document.getElementById('api_endpoint').value = localStorage.getItem('api_endpoint') || 'xiaomimimo';
             const savedHistory = localStorage.getItem('tts_history');
             if (savedHistory) {
                 historyList = JSON.parse(savedHistory);
@@ -723,6 +729,9 @@
             document.getElementById('api_key').addEventListener('change', function() {
                 localStorage.setItem('api_key', this.value);
             });
+            document.getElementById('api_endpoint').addEventListener('change', function() {
+                localStorage.setItem('api_endpoint', this.value);
+            });
         };
 
         function applyStyle() {
@@ -735,6 +744,7 @@
             const apiKey = document.getElementById('api_key').value;
             const text = document.getElementById('text_input').value.trim();
             const btn = document.getElementById('gen_btn');
+            const endpoint = document.getElementById('api_endpoint').value;
             
             let style = document.getElementById('style_preset').value;
             if (style === 'custom') style = document.getElementById('style_custom').value.trim();
@@ -768,7 +778,8 @@
                             api_key: apiKey,
                             model: currentModel,
                             audio: audioBase64,
-                            text: finalText
+                            text: finalText,
+                            endpoint: endpoint
                         })
                     });
                     if (!response.ok) {
@@ -786,10 +797,10 @@
                 let url;
                 if (currentModel === 'v2.5_design') {
                     const voiceDesc = document.getElementById('voice_desc').value.trim();
-                    url = '/tts?api_key=' + encodeURIComponent(apiKey) + '&model=' + currentModel + '&voice=' + encodeURIComponent(voiceDesc) + '&text=' + encodeURIComponent(finalText);
+                    url = '/tts?api_key=' + encodeURIComponent(apiKey) + '&model=' + currentModel + '&voice=' + encodeURIComponent(voiceDesc) + '&text=' + encodeURIComponent(finalText) + '&endpoint=' + encodeURIComponent(endpoint);
                 } else {
                     const voice = document.getElementById('voice_select').value;
-                    url = '/tts?api_key=' + encodeURIComponent(apiKey) + '&voice=' + encodeURIComponent(voice) + '&model=' + currentModel + '&text=' + encodeURIComponent(finalText);
+                    url = '/tts?api_key=' + encodeURIComponent(apiKey) + '&voice=' + encodeURIComponent(voice) + '&model=' + currentModel + '&text=' + encodeURIComponent(finalText) + '&endpoint=' + encodeURIComponent(endpoint);
                 }
                 
                 const item = { text: style ? '[' + style + '] ' + text : text, url: url };
@@ -843,6 +854,7 @@
 
         function getImportUrl() {
             const apiKey = document.getElementById('api_key').value;
+            const endpoint = document.getElementById('api_endpoint').value;
             let importModel = 'v2.5';
             let voice = document.getElementById('voice_select').value;
 
@@ -860,7 +872,7 @@
                 }
             }
 
-            return baseUrl + '/api/legado-import?api_key=' + encodeURIComponent(apiKey) + '&voice=' + encodeURIComponent(voice) + '&model=' + encodeURIComponent(importModel);
+            return baseUrl + '/api/legado-import?api_key=' + encodeURIComponent(apiKey) + '&voice=' + encodeURIComponent(voice) + '&model=' + encodeURIComponent(importModel) + '&endpoint=' + encodeURIComponent(endpoint);
         }
 
         function directImport() {
